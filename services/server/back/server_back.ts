@@ -4,6 +4,25 @@ import { parse as parseQS } from 'querystring';
 import React = require('react');
 import ReactDOMServer = require('react-dom/server');
 
+
+const headTemplate = (title: string, jsPath: string, stylePath?: string) => `<head>
+    <title>${title}</title>
+    <script src="bundle.js"></script>        
+</head>`;
+
+const bodyTemplate = (content, appId) => `<body>
+    <div id="${appId}">${content}</div>
+</body>`;
+
+const htmlTemplate = ({ content }: { content: string }) => `<!DOCTYPE "html">
+<html>
+${headTemplate(
+    "ScrumTracker :: Список задач",
+    "bundle.js"
+)}
+${bodyTemplate(content, 'app')}
+</html>`;
+
 export class BackRequest<D> implements Request<D> {
 
     constructor(private serverRequest: ServerRequest, private serverResponse: ServerResponse) {}
@@ -33,16 +52,9 @@ export class BackRequest<D> implements Request<D> {
     createJsxResponse(jsx: JSX.Element): Response {
         return this.createTextResponse(
             'text/html',
-`<!DOCTYPE "html">
-<html>
-<head>
-    <title>ScrumTracker :: Список задач</title>
-    <script src="bundle.js"></script>
-</head>
-<body>
-    <div id="app">${ReactDOMServer.renderToString(jsx)}</div>
-</body>
-</html>`
+            htmlTemplate({
+                content: ReactDOMServer.renderToString(jsx)
+            })
         );
     }
 
