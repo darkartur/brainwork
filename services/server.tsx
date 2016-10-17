@@ -5,6 +5,7 @@ import { BackRequest, HTMLTemplate } from './server/back/server_back';
 
 import { createServer, ServerRequest, ServerResponse } from "http";
 import { readFileSync } from "fs";
+import * as mime from "mime";
 
 export default class ServerBackService extends Service implements ServerService {
 
@@ -23,7 +24,7 @@ export default class ServerBackService extends Service implements ServerService 
 
         try {
             request.createTextResponse(
-                'text/javascript',
+                mime.lookup(serverRequest.url),
                 readFileSync('htdocs/' + serverRequest.url).toString()
             ).send();
         } catch (e) {
