@@ -18,8 +18,8 @@ class Route {
     }
 }
 class Router extends service_locator_1.Service {
-    constructor() {
-        super(...arguments);
+    constructor(...args) {
+        super(...args);
         this.routes = [];
     }
     dispatchRequest(request) {

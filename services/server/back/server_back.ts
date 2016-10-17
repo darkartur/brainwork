@@ -56,9 +56,7 @@ export class BackRequest<D> implements Request<D> {
 
     loadPostData(): Promise<D> {
         return this.getMethod() === HTTPMethod.POST ? parsePost<D>(this.serverRequest).then(
-            (data) => {
-                this.postData = data;
-            }
+            (data) => this.postData = data
         ) : Promise.resolve<any>({});
     }
 
