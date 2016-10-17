@@ -14,18 +14,35 @@ const bodyTemplate = (content, appId) => `<body>
     <div id="${appId}">${content}</div>
 </body>`;
 
-const htmlTemplate = ({ content }: { content: string }) => `<!DOCTYPE "html">
+interface HTMLOptions {
+    content: string;
+    title: string;
+    jsPath: string;
+    stylePath: string;
+}
+
+export interface HTMLTemplate {
+    (content: string): string;
+}
+
+
+export const htmlTemplate = ({ content, title, jsPath, stylePath }: HTMLOptions) => `<!DOCTYPE "html">
 <html>
 ${headTemplate(
-    "ScrumTracker :: Список задач",
-    "bundle.js"
+    title,
+    jsPath,
+    stylePath
 )}
 ${bodyTemplate(content, 'app')}
 </html>`;
 
 export class BackRequest<D> implements Request<D> {
 
-    constructor(private serverRequest: ServerRequest, private serverResponse: ServerResponse) {}
+    constructor(
+        private serverRequest: ServerRequest,
+        private serverResponse: ServerResponse,
+        private htmlTemplate: HTMLTemplate
+    ) {}
 
     getUrl(): string {
         return this.serverRequest.url;
@@ -52,9 +69,7 @@ export class BackRequest<D> implements Request<D> {
     createJsxResponse(jsx: JSX.Element): Response {
         return this.createTextResponse(
             'text/html',
-            htmlTemplate({
-                content: ReactDOMServer.renderToString(jsx)
-            })
+            this.htmlTemplate(ReactDOMServer.renderToString(jsx))
         );
     }
 

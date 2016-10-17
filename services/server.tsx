@@ -1,12 +1,16 @@
-import { Service } from "../service_locator";
+import { Service, default as ServiceLocator } from "../service_locator";
 import { ServerService, Response } from "./server/server";
 
-import { BackRequest } from './server/back/server_back';
+import { BackRequest, HTMLTemplate } from './server/back/server_back';
 
 import { createServer, ServerRequest, ServerResponse } from "http";
 import { readFileSync } from "fs";
 
 export default class ServerBackService extends Service implements ServerService {
+
+    constructor(sl: ServiceLocator, private htmlTemplate: HTMLTemplate) {
+        super(sl);
+    }
 
     private httpServer = createServer(
         (request, response) => this.dispatchRequest(request as ServerRequest, response)
@@ -15,7 +19,7 @@ export default class ServerBackService extends Service implements ServerService 
     private dispatchRequest(serverRequest: ServerRequest, serverResponse: ServerResponse) {
 
 
-        let request = new BackRequest(serverRequest, serverResponse);
+        let request = new BackRequest(serverRequest, serverResponse, this.htmlTemplate);
 
         try {
             request.createTextResponse(
