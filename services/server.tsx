@@ -21,9 +21,10 @@ export default class ServerBackService extends Service implements ServerService 
         let request = new BackRequest(serverRequest, serverResponse, this.htmlTemplate);
 
         let staticPath = 'htdocs/' + serverRequest.url;
+        let stat = existsSync(staticPath) && statSync(staticPath);
 
-        if (existsSync(staticPath)) {
-            let stat = statSync(staticPath);
+        if (stat && stat.isFile()) {
+
 
             serverResponse.writeHead(200, {
                 'Content-Type': mime.lookup(serverRequest.url),
