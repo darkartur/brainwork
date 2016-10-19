@@ -6,14 +6,25 @@ interface RouteOptions {
     method: HTTPMethod;
 }
 
-interface actionCallback<D> {
+export interface ActionCallback<D> {
     (request: Request<D>, matches: RegExpMatchArray): Promise<Response> | Response;
 }
+
+export const route = (path: string, method: HTTPMethod = HTTPMethod.GET) => (target: Router, propertyKey: string) => {
+    target.addRoute(
+        {
+            pattern: new RegExp(path),
+            method: method
+        },
+        (request) => target[propertyKey].call(this, request)
+    );
+};
+
 
 class Route<D> {
     constructor(
         private options: RouteOptions,
-        private action: actionCallback<D>
+        private action: ActionCallback<D>
     ) {}
 
     execute(request: Request<D>): Promise<Response> {
@@ -49,10 +60,14 @@ export default class Router extends Service {
         }
     }
 
-    protected addRoute<D>(options: RouteOptions, callback: actionCallback<D>) {
+    addRoute<D>(options: RouteOptions, callback: ActionCallback<D>) {
+        if (!this.routes) {
+            this.routes = [];
+        }
+
         this.routes.push(new Route(options, callback));
     }
 
-    private routes: Route<any>[] = [];
+    private routes: Route<any>[];
 
 }
