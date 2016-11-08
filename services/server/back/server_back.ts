@@ -4,9 +4,9 @@ import { parse as parseQS } from 'querystring';
 import React = require('react');
 import ReactDOMServer = require('react-dom/server');
 
-const headTemplate = (title: string, jsPath: string, stylePaths: string[] = []) => `<head>
+const headTemplate = (title: string, jsPaths: string[], stylePaths: string[] = []) => `<head>
     <title>${title}</title>
-    <script src="${jsPath}"></script>
+    ${jsPaths.map(path => `<script src="${path}"></script>`).join('\r\n')}
     ${stylePaths.map(path => `<link href="${path}" rel="stylesheet"/>`).join('\r\n')}
 </head>`;
 
@@ -17,7 +17,7 @@ const bodyTemplate = (content, appId) => `<body>
 interface HTMLOptions {
     content: string;
     title: string;
-    jsPath: string;
+    jsPaths: string[];
     stylePaths?: string[];
 }
 
@@ -26,11 +26,11 @@ export interface HTMLTemplate {
 }
 
 
-export const htmlTemplate = ({ content, title, jsPath, stylePaths }: HTMLOptions) => `<!DOCTYPE "html">
+export const htmlTemplate = ({ content, title, jsPaths, stylePaths }: HTMLOptions) => `<!DOCTYPE "html">
 <html>
 ${headTemplate(
     title,
-    jsPath,
+    jsPaths,
     stylePaths
 )}
 ${bodyTemplate(content, 'app')}
