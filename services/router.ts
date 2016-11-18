@@ -22,6 +22,22 @@ export const route = (path: string, method: HTTPMethod = HTTPMethod.GET) => (tar
     );
 };
 
+export const jsx = (target: Router, propertyKey: string) => {
+    const method = target[propertyKey];
+
+    return {
+        // TODO Убрать any https://github.com/Microsoft/TypeScript/issues/4881
+        value: <any>function(request) {
+            return Promise.resolve<JSX.Element>(method.call(this)).then<Response>(
+                jsx => {
+                    console.log('after method call',jsx);
+                    return request.createJsxResponse(jsx);
+                }
+            );
+        }
+    };
+};
+
 
 class Route<D> {
     constructor(
