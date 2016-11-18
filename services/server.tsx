@@ -40,7 +40,8 @@ export default class ServerBackService extends Service implements ServerService 
         request.loadPostData().then<Response>(
             () => this.router.dispatchRequest(request)
         ).then(
-            (response) => response.send()
+            (response) => response.send(),
+            (error) => console.log(error)
         );
     }
 
