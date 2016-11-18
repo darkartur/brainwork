@@ -16,7 +16,9 @@ export const route = (path: string, method: HTTPMethod = HTTPMethod.GET) => (tar
             pattern: new RegExp(path),
             method: method
         },
-        (request) => target[propertyKey].call(this, request)
+        function(request) {
+            return target[propertyKey].call(this, request)
+        }
     );
 };
 
@@ -27,7 +29,7 @@ class Route<D> {
         private action: ActionCallback<D>
     ) {}
 
-    execute(request: Request<D>): Promise<Response> {
+    execute(request: Request<D>, context: any): Promise<Response> {
         var matches: RegExpMatchArray;
 
         if (this.options.method !== request.getMethod()) {
@@ -40,7 +42,7 @@ class Route<D> {
             return;
         }
 
-        return Promise.resolve<Response>(this.action(request, matches));
+        return Promise.resolve<Response>(this.action.call(context, request, matches));
     }
 
 
@@ -53,7 +55,7 @@ export default class Router extends Service {
             result: Promise<Response>;
 
         for (let i = 0; i < l; i++) {
-            result = this.routes[i].execute(request);
+            result = this.routes[i].execute(request, this);
             if (result) {
                 return result;
             }
