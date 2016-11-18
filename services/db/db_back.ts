@@ -1,33 +1,49 @@
-import Ticket, {DIRECTORY} from "../../../src/ticket";
 import * as fs from 'fs';
 import { DataBaseService } from "./db";
 
 export default class DataBaseBackService implements DataBaseService {
 
-    loadAll(): Promise<Ticket[]> {
-        return Promise.resolve(Ticket.loadAll(this));
+    loadAll<R>(resourceName: string): Promise<R[]> {
+        return this.loadAllFilenames(resourceName).then(
+            filenames => this.loadByFilenames<R>(resourceName, filenames)
+        )
     }
 
-    loadOne(id: string): Ticket {
-        return Ticket.loadOne(this, id);
+    loadOne<R>(resourceName: string, id: number) {
+        return this.loadResource<R>(
+            resourceName,
+            this.generateFilename(id)
+        );
     }
 
-    create(): Ticket {
-        return Ticket.create(this);
+    private generateFilename(id: number) {
+        return id + '.json';
     }
 
-    loadDescription(filename: string): string {
-        if (fs.existsSync(filename)) {
-            return fs.readFileSync(filename).toString();
-        }
+    private getResourceDirectoryName(resourceName: string): string {
+        return './data/' + resourceName + '/';
     }
 
-    saveDescription(filename: string, description: string) {
-        fs.writeFileSync(filename, description);
+    private loadAllFilenames(resourceName: string): Promise<string[]> {
+        return new Promise<string[]>( resolve => fs.readdir(
+            this.getResourceDirectoryName(resourceName),
+            (err, files) => resolve(files)
+        ));
     }
 
-    loadFilenames(): string[] {
-        return fs.readdirSync(DIRECTORY).map(Ticket.normalizeFilename)
+    private loadByFilenames<R>(resourceName: string, filenames: string[]): Promise<R[]> {
+        console.log('loadByFilenames');
+        return Promise.all<R>(filenames.map(
+            filename => this.loadResource(resourceName, filename)
+        ));
+    }
+
+    private loadResource<R>(resourceName: string, filename: string): Promise<R> {
+        console.log('loadResource');
+        return new Promise<R>( resolve => fs.readFile(
+            this.getResourceDirectoryName(resourceName) + '/' + filename,
+            (err, data) => resolve(JSON.parse(data.toString()))
+        ));
     }
     
 }
