@@ -30,7 +30,6 @@ export const jsx = (target: Router, propertyKey: string) => {
         value: <any>function(request) {
             return Promise.resolve<JSX.Element>(method.call(this)).then<Response>(
                 jsx => {
-                    console.log('after method call',jsx);
                     return request.createJsxResponse(jsx);
                 }
             );

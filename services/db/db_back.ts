@@ -32,14 +32,12 @@ export default class DataBaseBackService implements DataBaseService {
     }
 
     private loadByFilenames<R>(resourceName: string, filenames: string[]): Promise<R[]> {
-        console.log('loadByFilenames');
         return Promise.all<R>(filenames.map(
             filename => this.loadResource(resourceName, filename)
         ));
     }
 
     private loadResource<R>(resourceName: string, filename: string): Promise<R> {
-        console.log('loadResource');
         return new Promise<R>( resolve => fs.readFile(
             this.getResourceDirectoryName(resourceName) + '/' + filename,
             (err, data) => resolve(JSON.parse(data.toString()))
