@@ -14,5 +14,9 @@ export default class DataBaseFrontService implements DataBaseService {
     loadOne(resourceName: string, id: number) {
         return this.fetch(`/api/${resourceName}/${id}`);
     }
+
+    create() {
+        return null;
+    }
 }
 

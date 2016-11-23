@@ -1,18 +1,48 @@
 import * as fs from 'fs';
 import { DataBaseService } from "./db";
 
+export interface ResourceData {
+    id: number;
+}
+
 export default class DataBaseBackService implements DataBaseService {
 
-    loadAll<R>(resourceName: string): Promise<R[]> {
+    loadAll<R extends ResourceData>(resourceName: string): Promise<R[]> {
         return this.loadAllFilenames(resourceName).then(
             filenames => this.loadByFilenames<R>(resourceName, filenames)
         )
     }
 
-    loadOne<R>(resourceName: string, id: number) {
+    loadOne<R extends ResourceData>(resourceName: string, id: number) {
         return this.loadResource<R>(
             resourceName,
             this.generateFilename(id)
+        );
+    }
+
+    create<R extends ResourceData>(resourceName: string, data: R): Promise<R> {
+        return this.calculateNextId(resourceName).then<R>(id => {
+            let identifiedData = Object.assign({}, data, { id });
+
+            return this.saveResource(
+                resourceName,
+                this.generateFilename(id),
+                identifiedData
+            ).then(() => identifiedData)
+        });
+    }
+
+    private calculateNextId(resourceName: string): Promise<number> {
+        return this.loadAllFilenames(resourceName).then(
+            (filenames) => filenames.length ? parseInt(filenames.pop()) + 1 : 1
+        );
+    }
+
+    private saveResource(resourceName: string, filename: string, data: any): Promise<void> {
+        return new Promise<void>(resolve => fs.writeFile(
+            this.getResourcePath(resourceName, filename),
+            JSON.stringify(data),
+            (err, data) => resolve())
         );
     }
 
@@ -39,9 +69,13 @@ export default class DataBaseBackService implements DataBaseService {
 
     private loadResource<R>(resourceName: string, filename: string): Promise<R> {
         return new Promise<R>( resolve => fs.readFile(
-            this.getResourceDirectoryName(resourceName) + '/' + filename,
+            this.getResourcePath(resourceName, filename),
             (err, data) => resolve(JSON.parse(data.toString()))
         ));
+    }
+
+    private getResourcePath(resourceName: string, filename: string) {
+        return this.getResourceDirectoryName(resourceName) + '/' + filename;
     }
     
 }
