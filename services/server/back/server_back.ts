@@ -71,11 +71,11 @@ export class BackRequest<D> implements Request<D> {
         );
     }
 
-    createRedirectResponse(): Response {
+    createRedirectResponse(location: string): Response {
         return {
             send: () => this.send(
                 302,
-                { 'Location': '/' }
+                { 'Location': location }
             )
         }
     }

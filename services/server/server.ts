@@ -10,7 +10,7 @@ export interface Request<D> {
     getMethod(): HTTPMethod;
     getPostData(): D;
     createJsxResponse(jsx: JSX.Element): Response;
-    createRedirectResponse(): Response;
+    createRedirectResponse(location: string): Response;
     createJsonResponse(object: Object): Response;
 }
 
