@@ -13,7 +13,7 @@ export default class DataBaseBackService implements DataBaseService {
         )
     }
 
-    loadOne<R extends ResourceData>(resourceName: string, id: number) {
+    loadOne<R extends ResourceData>(resourceName: string, id: number): Promise<R> {
         return this.loadResource<R>(
             resourceName,
             this.generateFilename(id)
