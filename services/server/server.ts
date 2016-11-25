@@ -1,5 +1,5 @@
 export interface ServerService {
-    listen(port: number, host: string);
+    listen(port: number, host?: string);
 }
 export enum HTTPMethod {
     GET, POST
