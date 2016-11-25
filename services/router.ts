@@ -10,14 +10,19 @@ export interface ActionCallback<D> {
     (request: Request<D>, matches: RegExpMatchArray): Promise<Response> | Response;
 }
 
+
 export const route = (path: string, method: HTTPMethod = HTTPMethod.GET) => (target: Router, propertyKey: string) => {
+    const pathRegExp = /:([^/]*)/g;
+
     target.addRoute(
         {
-            pattern: new RegExp(path),
+            pattern: new RegExp(path.replace(pathRegExp, '(.+)')),
             method: method
         },
-        function(request) {
-            return target[propertyKey].call(this, request)
+        function(request, matches: RegExpMatchArray) {
+            let args = matches.slice(1);
+
+            return target[propertyKey].apply(this, [request, ...args])
         }
     );
 };
@@ -27,8 +32,8 @@ export const jsx = (target: Router, propertyKey: string) => {
 
     return {
         // TODO Убрать any https://github.com/Microsoft/TypeScript/issues/4881
-        value: <any>function(request) {
-            return Promise.resolve<JSX.Element>(method.call(this)).then<Response>(
+        value: <any>function(request, ...args) {
+            return Promise.resolve<JSX.Element>(method.apply(this, [request, ...args])).then<Response>(
                 jsx => {
                     return request.createJsxResponse(jsx);
                 }
