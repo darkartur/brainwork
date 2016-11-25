@@ -32,6 +32,10 @@ export default class DataBaseBackService implements DataBaseService {
         });
     }
 
+    delete(resourceName: string, id: number): Promise<void> {
+        return this.removeResource(resourceName, this.generateFilename(id));
+    }
+
     private calculateNextId(resourceName: string): Promise<number> {
         return this.loadAllFilenames(resourceName).then(
             (filenames) => filenames.length ? parseInt(filenames.pop()) + 1 : 1
@@ -71,6 +75,13 @@ export default class DataBaseBackService implements DataBaseService {
         return new Promise<R>( resolve => fs.readFile(
             this.getResourcePath(resourceName, filename),
             (err, data) => resolve(JSON.parse(data.toString()))
+        ));
+    }
+
+    private removeResource(resourceName: string, filename: string): Promise<void> {
+        return new Promise<void>( resolve => fs.unlink(
+            this.getResourcePath(resourceName, filename),
+            err => resolve()
         ));
     }
 
