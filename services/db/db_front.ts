@@ -19,6 +19,10 @@ export default class DataBaseFrontService implements DataBaseService {
         return null;
     }
 
+    update() {
+        return null;
+    }
+
     delete() {
         return null;
     }

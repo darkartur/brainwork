@@ -32,6 +32,16 @@ export default class DataBaseBackService implements DataBaseService {
         });
     }
 
+    update<R extends ResourceData>(resourceName: string, id: number, data: R): Promise<R> {
+        let identifiedData = Object.assign({}, data, { id });
+
+        return this.saveResource(
+            resourceName,
+            this.generateFilename(id),
+            identifiedData
+        ).then(() => identifiedData)
+    }
+
     delete(resourceName: string, id: number): Promise<void> {
         return this.removeResource(resourceName, this.generateFilename(id));
     }
