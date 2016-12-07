@@ -3,6 +3,7 @@ import { Request, Response, HTTPMethod } from '../server';
 import { parse as parseQS } from 'querystring';
 import React = require('react');
 import ReactDOMServer = require('react-dom/server');
+import {Form as MultipartyForm} from 'multiparty';
 
 const headTemplate = (title: string, jsPaths: string[], stylePaths: string[] = []) => `<head>
     <title>${title}</title>
@@ -118,6 +119,24 @@ function strToMethod(str: string): HTTPMethod {
 }
 
 function parsePost<TResponse extends Object>(request: ServerRequest): Promise<TResponse> {
+    let [contentType] = request.headers['content-type'].split(';');
+    switch (contentType) {
+        case "multipart/form-data":
+            return parsePostMultipart<TResponse>(request);
+        default:
+            return parsePostQS<TResponse>(request)
+    }
+}
+
+function parsePostMultipart<TResponse>(request: ServerRequest): Promise<TResponse> {
+    var form = new MultipartyForm();
+
+    return new Promise<TResponse>((resolve) => form.parse(request, (error, fields, files) => {
+        resolve(fields);
+    }));
+}
+
+function parsePostQS<TResponse>(request: ServerRequest) {
     return new Promise<TResponse>((resolve) => {
         var data = '';
         request.on('data', (chunk) => {
