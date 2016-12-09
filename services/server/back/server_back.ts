@@ -140,8 +140,9 @@ function parsePostMultipart<TResponse>(request: ServerRequest): Promise<TRespons
         Object.keys(files).forEach(fieldName => {
             let file = files[fieldName][0];
 
-            fields[fieldName] = file.path.replace(uploadDir + '/', '');
-
+            if (file.size > 0) {
+                fields[fieldName] = file.path.replace(uploadDir + '/', '');
+            }
 
         });
         resolve(fields);
