@@ -129,9 +129,21 @@ function parsePost<TResponse extends Object>(request: ServerRequest): Promise<TR
 }
 
 function parsePostMultipart<TResponse>(request: ServerRequest): Promise<TResponse> {
-    var form = new MultipartyForm();
+    const uploadDir = 'public_html/uploads';
+    const form = new MultipartyForm({
+        autoFiles: true,
+        uploadDir
+    });
 
     return new Promise<TResponse>((resolve) => form.parse(request, (error, fields, files) => {
+
+        Object.keys(files).forEach(fieldName => {
+            let file = files[fieldName][0];
+
+            fields[fieldName] = file.path.replace(uploadDir + '/', '');
+
+
+        });
         resolve(fields);
     }));
 }
